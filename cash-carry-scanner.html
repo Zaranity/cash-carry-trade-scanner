@@ -242,6 +242,53 @@
     .abar-bg   { height:2px; background:var(--muted); border-radius:1px; margin-top:5px; overflow:hidden; }
     .abar-fill { height:100%; border-radius:1px; transition:width .35s ease; }
 
+    /* ─── ALERT BAR ─── */
+    .alert-bar {
+      display:flex; gap:10px; align-items:center;
+      padding:8px 22px; background:var(--surface);
+      border-bottom:1px solid var(--border); flex-wrap:wrap;
+    }
+    .alert-lbl { font-size:11px; color:#8898b4; white-space:nowrap; }
+    .alert-input {
+      width:72px; padding:4px 8px;
+      background:var(--card); border:1px solid var(--border2);
+      border-radius:4px; color:var(--text); font-size:12px;
+      outline:none; transition:border-color .15s;
+    }
+    .alert-input:focus { border-color:var(--blue); }
+    .alert-unit { font-size:11px; color:#8898b4; }
+    .alert-toggle {
+      display:flex; align-items:center; gap:7px; cursor:pointer;
+      padding:4px 11px; border:1px solid var(--border);
+      border-radius:4px; font-size:11px; color:var(--dim);
+      background:transparent; transition:all .15s; white-space:nowrap;
+    }
+    .alert-toggle:hover { border-color:var(--border2); color:var(--text); }
+    .alert-toggle.on {
+      background:rgba(0,212,156,.1); border-color:rgba(0,212,156,.35); color:var(--up);
+    }
+    .alert-dot {
+      width:6px; height:6px; border-radius:50%;
+      background:var(--dim); transition:background .2s;
+    }
+    .alert-toggle.on .alert-dot {
+      background:var(--up); box-shadow:0 0 5px var(--up);
+      animation:pulse 1.6s ease-in-out infinite;
+    }
+    .alert-status { font-size:11px; color:#8898b4; margin-left:2px; }
+    .notif-badge {
+      position:fixed; bottom:24px; right:24px; z-index:999;
+      background:var(--card); border:1px solid rgba(0,212,156,.35);
+      border-radius:8px; padding:12px 16px; max-width:320px;
+      box-shadow:0 4px 24px rgba(0,0,0,.6);
+      animation:slideIn .25s ease;
+    }
+    .notif-badge.hide { animation:slideOut .25s ease forwards; }
+    @keyframes slideIn  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+    @keyframes slideOut { to  {opacity:0;transform:translateY(16px)} }
+    .notif-title { font-size:12px; font-weight:500; color:var(--up); margin-bottom:6px; }
+    .notif-row   { font-size:11px; color:#c0c8d8; line-height:1.8; }
+
     /* loading / empty */
     .ctr { text-align:center; padding:56px 24px; color:var(--dim); }
     .spin {
@@ -342,6 +389,19 @@
       <button class="fbtn" id="fa-5"    onclick="setApy('gt5',this)">&gt; 5%</button>
       <button class="fbtn" id="fa-10"   onclick="setApy('gt10',this)">&gt; 10%</button>
     </div>
+  </div>
+
+  <!-- ALERT CONFIG -->
+  <div class="alert-bar">
+    <span class="alert-lbl">🔔 APY Alert</span>
+    <span class="alert-lbl">Threshold</span>
+    <input class="alert-input" type="number" id="alert-threshold" value="10" min="0" step="0.5" />
+    <span class="alert-unit">%</span>
+    <button class="alert-toggle" id="alert-toggle-btn" onclick="toggleAlert()">
+      <div class="alert-dot"></div>
+      <span id="alert-toggle-txt">Enable Alerts</span>
+    </button>
+    <span class="alert-status" id="alert-status"></span>
   </div>
 
 </div><!-- /#top-band -->
@@ -715,7 +775,7 @@ async function manualRefresh() {
 // ═══════════════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════════════
-function renderAll() { renderExSt(); renderStats(); renderTable(); }
+function renderAll() { renderExSt(); renderStats(); renderTable(); checkAlerts(); }
 
 function renderExSt() {
   document.getElementById('ex-status').innerHTML =
@@ -833,6 +893,101 @@ function srt(col) {
   sCol=col;
   renderTable();
 }
+
+// ═══════════════════════════════════════════════
+// ALERT SYSTEM
+// ═══════════════════════════════════════════════
+let alertEnabled = false;
+let alertedKeys  = new Set();   // track already-notified pairs this session
+let toastTimer   = null;
+
+function alertThreshold() {
+  return parseFloat(document.getElementById('alert-threshold').value) || 0;
+}
+
+async function toggleAlert() {
+  if (!alertEnabled) {
+    // request permission first
+    if (Notification.permission === 'default') {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') {
+        setAlertStatus('Permission denied — enable notifications in browser settings', '#f87171');
+        return;
+      }
+    }
+    if (Notification.permission === 'denied') {
+      setAlertStatus('Notifications blocked — allow them in browser settings', '#f87171');
+      return;
+    }
+    alertEnabled = true;
+    alertedKeys.clear();
+  } else {
+    alertEnabled = false;
+  }
+  const btn = document.getElementById('alert-toggle-btn');
+  const txt = document.getElementById('alert-toggle-txt');
+  btn.classList.toggle('on', alertEnabled);
+  txt.textContent = alertEnabled ? 'Alerts On' : 'Enable Alerts';
+  setAlertStatus(alertEnabled ? `Will notify when APY ≥ ${alertThreshold()}%` : '', '');
+}
+
+function setAlertStatus(msg, color) {
+  const el = document.getElementById('alert-status');
+  el.textContent = msg;
+  el.style.color = color || '#8898b4';
+}
+
+function checkAlerts() {
+  if (!alertEnabled) return;
+  const thr = alertThreshold();
+  const hits = opps.filter(r => r.apy !== null && isFinite(r.apy) && r.apy >= thr);
+  const newHits = hits.filter(r => {
+    const key = `${r.exchange}:${r.futuresSymbol}`;
+    if (alertedKeys.has(key)) return false;
+    alertedKeys.add(key);
+    return true;
+  });
+  if (!newHits.length) return;
+
+  // Web Notification
+  newHits.forEach(r => {
+    const title = `Cash-Carry Alert: ${r.baseAsset} ${fa(r.apy)}`;
+    const body  = `${r.exchange} · ${r.futuresSymbol} · Basis ${r.premium.toFixed(3)}% · ${Math.round(r.days)}d to expiry`;
+    new Notification(title, { body, icon: '' });
+  });
+
+  // In-page toast (shows top result)
+  showToast(newHits);
+}
+
+function showToast(hits) {
+  clearTimeout(toastTimer);
+  const existing = document.getElementById('notif-toast');
+  if (existing) existing.remove();
+
+  const rows = hits.slice(0, 5).map(r =>
+    `<div class="notif-row"><strong style="color:var(--text)">${r.baseAsset}</strong> &nbsp;${r.exchange} &nbsp;<span style="color:${apyColor(r.apy)};font-weight:600">${fa(r.apy)}</span> &nbsp;<span style="color:#7a8fab">${Math.round(r.days)}d</span></div>`
+  ).join('');
+
+  const toast = document.createElement('div');
+  toast.id = 'notif-toast';
+  toast.className = 'notif-badge';
+  toast.innerHTML = `<div class="notif-title">🔔 APY Alert — ${hits.length} pair${hits.length>1?'s':''} above ${alertThreshold()}%</div>${rows}`;
+  document.body.appendChild(toast);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 260);
+  }, 6000);
+}
+
+// re-check threshold label whenever input changes
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('alert-threshold').addEventListener('input', () => {
+    if (alertEnabled) setAlertStatus(`Will notify when APY ≥ ${alertThreshold()}%`, '');
+    alertedKeys.clear();   // reset so new threshold triggers fresh notifications
+  });
+});
 
 // ═══════════════════════════════════════════════
 // BOOT
