@@ -6,7 +6,7 @@
   <title>Cash-Carry Trade Scanner</title>
   <style>
     :root {
-      --bg:      #0a0a0a;        /* pure dark, no blue tint */
+      --bg:      #0a0a0a;
       --surface: #111111;
       --card:    #161616;
       --border:  #222222;
@@ -24,6 +24,12 @@
       --p-spot:  #e8e8e8;
       --p-bid:   #00d49c;
       --p-last:  #b0b0b0;
+      --radius-sm: 6px;
+      --radius:    10px;
+      --radius-lg: 14px;
+      /* label colours — bright near-white instead of blue-grey */
+      --label:   #d4dce8;
+      --sublabel: #c0cad6;
     }
 
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -66,7 +72,7 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
 
     .pill {
-      font-size:11px; color:#8898b4;
+      font-size:11px; color:var(--label);
       background:var(--card); border:1px solid var(--border);
       border-radius:20px; padding:2px 10px;
     }
@@ -74,7 +80,7 @@
     .ex-row { display:flex; gap:6px; }
     .ex-tag {
       display:flex; align-items:center; gap:4px;
-      font-size:11px; color:#8898b4;
+      font-size:11px; color:var(--label);
       background:var(--card); border:1px solid var(--border);
       border-radius:20px; padding:2px 9px;
     }
@@ -83,7 +89,7 @@
     .dot-loading { background:var(--neu); animation:pulse 1s infinite; }
     .dot-error   { background:var(--dn); }
 
-    .upd-time { font-size:11px; color:#8898b4; white-space:nowrap; }
+    .upd-time { font-size:11px; color:var(--label); white-space:nowrap; }
 
     /* ─── CIRCULAR COUNTDOWN ─── */
     .cdown-wrap { display:flex; align-items:center; gap:7px; }
@@ -94,7 +100,7 @@
                   stroke-linecap:round; transform:rotate(-90deg);
                   transform-origin:50% 50%;
                   transition: stroke .3s; }   /* colour fades; position is instant */
-    .ring-num   { font-size:8.5px; fill:#8898b4; dominant-baseline:middle;
+    .ring-num   { font-size:8.5px; fill:var(--label); dominant-baseline:middle;
                   text-anchor:middle; font-weight:400; }
 
     .btn-ref {
@@ -119,9 +125,14 @@
     }
     .stat {
       background:var(--card); border:1px solid var(--border);
-      border-radius:6px; padding:8px 14px; min-width:90px;
+      border-radius:var(--radius-sm); padding:8px 14px; min-width:90px;
+      transition: border-color .2s, box-shadow .2s;
     }
-    .stat-lbl { font-size:10px; color:#7a8fab; text-transform:uppercase; letter-spacing:.6px; }
+    .stat.stat-hero {
+      border-color:rgba(0,212,156,.25);
+      box-shadow:0 0 12px rgba(0,212,156,.08);
+    }
+    .stat-lbl { font-size:10px; color:var(--label); text-transform:uppercase; letter-spacing:.6px; }
     .stat-val { font-size:16px; font-weight:500; margin-top:2px; line-height:1.1; color:var(--text); }
 
     /* ─── STRATEGY BANNER ─── */
@@ -135,7 +146,7 @@
       background:rgba(0,212,156,.07); border:1px solid rgba(0,212,156,.18);
       border-radius:4px; padding:3px 10px; white-space:nowrap;
     }
-    .strat-txt { font-size:11px; color:#8898b4; line-height:1.6; }
+    .strat-txt { font-size:11px; color:var(--label); line-height:1.6; }
 
     /* ─── FILTERS ─── */
     .filters {
@@ -143,7 +154,7 @@
       padding:9px 22px; background:var(--surface);
       border-bottom:1px solid var(--border); flex-wrap:wrap;
     }
-    .flbl { font-size:11px; color:#8898b4; margin-right:2px; }
+    .flbl { font-size:11px; color:var(--label); margin-right:2px; }
     .fbtn {
       padding:4px 11px; border:1px solid var(--border);
       background:transparent; color:var(--dim);
@@ -174,8 +185,7 @@
       padding:9px 13px; text-align:left;
       font-size:10px; font-weight:400;
       text-transform:uppercase; letter-spacing:.6px;
-      color:#8898b4;
-      border-top:1px solid var(--border);
+      color:var(--label);
       border-bottom:1px solid var(--border);
       white-space:nowrap; cursor:pointer; user-select:none;
     }
@@ -191,7 +201,7 @@
     tr:hover td { background:#141414; }
 
     /* ─── CELL STYLES ─── */
-    .rk { font-size:11px; color:#7a8fab; }
+    .rk { font-size:11px; color:var(--label); }
 
     .ex-badge {
       display:inline-flex; align-items:center;
@@ -207,7 +217,7 @@
     .asset-link { text-decoration:none; }
     .asset { font-size:13px; font-weight:500; color:var(--text); }
     .asset-link:hover .asset { color:var(--blue); }
-    .asub  { font-size:10px; color:#7a8fab; margin-top:1px; }
+    .asub  { font-size:10px; color:var(--sublabel); margin-top:1px; }
 
     .mono { font-family:'Courier New',monospace; }
 
@@ -220,13 +230,14 @@
     /* contract symbol */
     .fsym { font-family:monospace; font-size:11px; }
     .fsym a {
-      color:#9fb4d0;
+      color:var(--text);
+      font-weight:600;
       text-decoration:none;
-      border-bottom:1px solid rgba(159,180,208,.2);
+      border-bottom:1px solid rgba(234,234,234,.18);
       transition:color .15s, border-color .15s;
     }
     .fsym a:hover { color:var(--blue); border-color:var(--blue); }
-    .ftyp { font-size:10px; color:#7a8fab; margin-top:2px; }
+    .ftyp { font-size:10px; color:var(--sublabel); margin-top:2px; }
 
     /* expiry */
     .exp-b {
@@ -235,8 +246,8 @@
     }
     .eu { background:rgba(246,70,93,.1);  color:#f87171; border:1px solid rgba(246,70,93,.22); }
     .es { background:rgba(240,185,11,.1); color:#fbbf24; border:1px solid rgba(240,185,11,.22); }
-    .en { background:rgba(100,120,150,.1); color:#8898b4; border:1px solid rgba(100,120,150,.22); }
-    .edays { font-size:10px; color:#7a8fab; margin-top:2px; }
+    .en { background:rgba(100,120,150,.1); color:var(--label); border:1px solid rgba(100,120,150,.22); }
+    .edays { font-size:10px; color:var(--sublabel); margin-top:2px; }
 
     /* basis % */
     .pp { color:var(--up); }
@@ -250,11 +261,12 @@
 
     /* ─── ALERT BAR ─── */
     .alert-bar {
-      display:flex; gap:10px; align-items:center;
+      display:flex; gap:8px; align-items:center;
       padding:8px 22px; background:var(--surface);
       border-bottom:1px solid var(--border); flex-wrap:wrap;
     }
-    .alert-lbl { font-size:11px; color:#8898b4; white-space:nowrap; }
+    .alert-lbl { font-size:11px; color:var(--label); white-space:nowrap; }
+    .alert-sep { width:1px; height:18px; background:var(--border2); flex-shrink:0; }
     .alert-input {
       width:72px; padding:4px 8px;
       background:var(--card); border:1px solid var(--border2);
@@ -262,7 +274,7 @@
       outline:none; transition:border-color .15s;
     }
     .alert-input:focus { border-color:var(--blue); }
-    .alert-unit { font-size:11px; color:#8898b4; }
+    .alert-unit { font-size:11px; color:var(--label); }
     .alert-toggle {
       display:flex; align-items:center; gap:7px; cursor:pointer;
       padding:4px 11px; border:1px solid var(--border);
@@ -281,19 +293,47 @@
       background:var(--up); box-shadow:0 0 5px var(--up);
       animation:pulse 1.6s ease-in-out infinite;
     }
-    .alert-status { font-size:11px; color:#8898b4; margin-left:2px; }
+    .btn-test-alert {
+      padding:4px 10px; border:1px solid var(--border2);
+      background:transparent; color:var(--dim);
+      border-radius:4px; font-size:11px; cursor:pointer; transition:all .15s; white-space:nowrap;
+    }
+    .btn-test-alert:hover { border-color:var(--blue); color:var(--blue); background:rgba(92,138,245,.07); }
+    .alert-status { font-size:11px; color:var(--label); margin-left:2px; }
+
+    /* ─── TOAST ─── */
     .notif-badge {
       position:fixed; bottom:24px; right:24px; z-index:999;
-      background:var(--card); border:1px solid rgba(0,212,156,.35);
-      border-radius:8px; padding:12px 16px; max-width:320px;
-      box-shadow:0 4px 24px rgba(0,0,0,.6);
-      animation:slideIn .25s ease;
+      background:var(--surface); width:340px; max-width:calc(100vw - 24px);
+      border:1px solid rgba(0,212,156,.3); border-left:3px solid var(--up);
+      border-radius:var(--radius); overflow:hidden;
+      box-shadow:0 12px 40px rgba(0,0,0,.85), 0 0 0 1px rgba(0,212,156,.08);
+      animation:slideIn .3s cubic-bezier(.34,1.56,.64,1);
     }
-    .notif-badge.hide { animation:slideOut .25s ease forwards; }
-    @keyframes slideIn  { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
-    @keyframes slideOut { to  {opacity:0;transform:translateY(16px)} }
-    .notif-title { font-size:12px; font-weight:500; color:var(--up); margin-bottom:6px; }
-    .notif-row   { font-size:11px; color:#c0c8d8; line-height:1.8; }
+    .notif-badge.hide { animation:slideOut .22s ease forwards; }
+    @keyframes slideIn  { from{opacity:0;transform:translateY(20px) scale(.96)} to{opacity:1;transform:none} }
+    @keyframes slideOut { to  {opacity:0;transform:translateY(12px)} }
+    .notif-head {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 12px 8px; border-bottom:1px solid rgba(255,255,255,.06);
+      background:rgba(0,212,156,.05);
+    }
+    .notif-title { font-size:12px; font-weight:600; color:var(--up); }
+    .notif-close {
+      width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+      background:transparent; border:none; color:var(--dim); cursor:pointer;
+      border-radius:4px; transition:all .15s; flex-shrink:0;
+    }
+    .notif-close:hover { background:rgba(255,255,255,.1); color:var(--text); }
+    .notif-body { padding:8px 12px 12px; }
+    .notif-row {
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12px; color:#c0c8d8; padding:4px 0;
+      border-bottom:1px solid rgba(255,255,255,.04);
+    }
+    .notif-row:last-child { border-bottom:none; }
+    .notif-row-asset { font-weight:600; color:var(--text); }
+    .notif-row-meta { font-size:11px; color:var(--sublabel); }
 
     /* loading / empty */
     .ctr { text-align:center; padding:56px 24px; color:var(--dim); }
@@ -305,6 +345,161 @@
     @keyframes sp { to{transform:rotate(360deg)} }
     .load-msg { font-size:13px; margin-bottom:5px; color:var(--text); }
     .load-sub { font-size:11px; }
+
+    /* ─── TABLE ACCENT ROW ─── */
+    tr.row-accent td:first-child { box-shadow: inset 3px 0 0 var(--row-accent-color); }
+
+    /* ─── CARD LIST (mobile) ─── */
+    .card-list { display:none; padding:8px 12px 32px; }
+    .mob-card {
+      background:var(--card); border:1px solid var(--border2);
+      border-radius:var(--radius); margin-bottom:14px; overflow:hidden;
+      position:relative;
+      box-shadow:0 2px 8px rgba(0,0,0,.3);
+    }
+    /* Left accent bar — color set inline via CSS var */
+    .mob-card::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+      background: var(--accent, var(--border2));
+    }
+    .mob-card-head {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:13px 14px 11px 18px; border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .mob-card-asset { display:flex; align-items:center; gap:9px; }
+    .mob-card-rank { font-size:12px; color:var(--label); }
+    .mob-card-apy {
+      padding:12px 14px 10px 18px; border-bottom:1px solid rgba(255,255,255,.05);
+      background:rgba(255,255,255,.02);
+    }
+    .mob-card-apy-lbl {
+      font-size:10px; color:var(--label); text-transform:uppercase;
+      letter-spacing:.7px; margin-bottom:5px;
+    }
+    .mob-card-apy-row { display:flex; align-items:baseline; gap:10px; }
+    .mob-card-apy-sub { font-size:12px; color:var(--label); }
+    .mob-card-grid { padding:4px 14px 10px 18px; }
+    .mob-cg-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:8px 0; border-bottom:1px solid rgba(255,255,255,.035);
+    }
+    .mob-cg-row:last-child { border-bottom:none; }
+    .mob-cg-lbl { font-size:12px; color:var(--label); flex-shrink:0; margin-right:10px; }
+    .mob-cg-val { font-size:13px; text-align:right; }
+    .mob-card-footer {
+      display:flex; gap:8px; padding:10px 14px 12px 18px;
+      border-top:1px solid rgba(255,255,255,.04);
+      background:rgba(0,0,0,.2);
+    }
+    .mob-trade-btn {
+      flex:1; padding:8px 0; text-align:center;
+      border-radius:var(--radius-sm); font-size:12px; font-weight:500;
+      text-decoration:none; transition:all .15s; display:block;
+    }
+    .mob-trade-btn.primary {
+      background:rgba(92,138,245,.15); border:1px solid rgba(92,138,245,.35); color:var(--blue);
+    }
+    .mob-trade-btn.primary:hover { background:rgba(92,138,245,.25); }
+    .mob-trade-btn.secondary {
+      background:rgba(255,255,255,.04); border:1px solid var(--border2); color:var(--dim);
+    }
+    .mob-trade-btn.secondary:hover { color:var(--text); border-color:var(--border2); }
+
+    /* ─── MOBILE EXPAND/COLLAPSE ─── */
+    .mob-toggle {
+      display:none; /* hidden on desktop */
+      align-items:center; justify-content:center; gap:5px;
+      width:100%; padding:6px 12px;
+      background:var(--surface); border:none;
+      border-bottom:1px solid var(--border);
+      color:var(--dim); font-size:11px; cursor:pointer;
+      transition:color .15s;
+    }
+    .mob-toggle:hover { color:var(--text); }
+    .mob-toggle svg { transition:transform .2s; }
+    .mob-toggle.open svg { transform:rotate(180deg); }
+    .mob-extras { /* wrapper for stats + strategy + alert */ }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      /* Remove sticky — let the page scroll naturally */
+      #top-band { position:static; }
+
+      /* Base font bump */
+      body { font-size: 15px; }
+
+      .hdr { padding:12px 14px; gap:8px; }
+      .hdr-left  { min-width:0; }
+      .hdr-right { width:100%; justify-content:flex-start; gap:8px; flex-wrap:wrap; }
+      .hdr-title { font-size:15px; }
+      .pill { font-size:12px; padding:3px 10px; }
+      .ex-tag { font-size:12px; padding:3px 9px; }
+      .upd-time { font-size:12px; }
+      .cdown-label { font-size:12px; }
+
+      /* Show the toggle button */
+      .mob-toggle { display:flex; font-size:13px; padding:9px 14px; }
+
+      /* Collapsible extras — hidden by default on mobile */
+      .mob-extras { display:none; }
+      .mob-extras.open { display:block; }
+
+      .stats-bar { padding:10px 14px; gap:8px; overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; }
+      .stat { min-width:80px; padding:8px 12px; flex-shrink:0; }
+      .stat-lbl { font-size:11px; }
+      .stat-val { font-size:16px; }
+
+      .strategy { padding:8px 14px; gap:8px; }
+      .strat-tag { font-size:12px; }
+      .strat-txt { font-size:12px; }
+
+      .filters { padding:10px 14px; gap:6px; }
+      .flbl { font-size:13px; }
+      .fbtn { font-size:12px; padding:5px 13px; }
+      .fright { margin-left:0; width:100%; }
+
+      .alert-bar { padding:8px 14px; gap:8px; flex-wrap:wrap; }
+      .alert-lbl { font-size:13px; }
+      .alert-input { width:64px; font-size:14px; }
+      .alert-unit { font-size:13px; }
+      .alert-toggle { font-size:13px; padding:5px 13px; }
+      .alert-status { font-size:12px; }
+
+      /* Switch to card list — hide the table */
+      .tbl-wrap { overflow-x:visible; padding:0; }
+      #tbl { display:none !important; }
+      .card-list { display:block; }
+
+      .err-area { padding:0 14px; }
+      .err-msg { font-size:13px; }
+
+      .notif-badge { bottom:12px; right:12px; left:12px; max-width:none; }
+      .notif-title { font-size:14px; }
+      .notif-row   { font-size:13px; }
+
+      .ctr { padding:48px 20px; }
+      .load-msg { font-size:15px; }
+      .load-sub  { font-size:13px; }
+    }
+
+    @media (max-width: 480px) {
+      body { font-size: 15px; }
+      .hdr { padding:10px 12px; flex-direction:column; align-items:flex-start; }
+      .hdr-right { gap:6px; }
+      .cdown-wrap { order:10; }
+
+      .stats-bar { padding:8px 12px; gap:6px; }
+      .stat { min-width:72px; padding:7px 10px; }
+      .stat-val { font-size:15px; }
+
+      .filters { padding:8px 12px; }
+      .alert-bar { padding:8px 12px; }
+
+      .mob-card-apy .apy-n { font-size:24px; }
+      .mob-cg-lbl { font-size:13px; }
+      .mob-cg-val { font-size:14px; }
+      .mob-trade-btn { font-size:13px; padding:10px 0; }
+    }
   </style>
 </head>
 <body>
@@ -344,11 +539,20 @@
     </div>
   </header>
 
+  <!-- MOBILE TOGGLE (hidden on desktop) -->
+  <button class="mob-toggle" id="mob-toggle" onclick="toggleMobExtras()">
+    <span id="mob-toggle-txt">Show Stats & Filters</span>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+
+  <!-- Collapsible section on mobile -->
+  <div class="mob-extras" id="mob-extras">
+
   <!-- STATS BAR -->
   <div class="stats-bar">
-    <div class="stat">
+    <div class="stat stat-hero">
       <div class="stat-lbl">Best APY</div>
-      <div class="stat-val" id="s-best" style="color:var(--green)">—</div>
+      <div class="stat-val" id="s-best" style="color:var(--up)">—</div>
     </div>
     <div class="stat">
       <div class="stat-lbl">Avg APY</div>
@@ -360,7 +564,7 @@
     </div>
     <div class="stat">
       <div class="stat-lbl">Positive APY</div>
-      <div class="stat-val" id="s-pos" style="color:var(--green)">—</div>
+      <div class="stat-val" id="s-pos" style="color:var(--up)">—</div>
     </div>
     <div class="stat">
       <div class="stat-lbl">Binance</div>
@@ -405,7 +609,8 @@
 
   <!-- ALERT CONFIG -->
   <div class="alert-bar">
-    <span class="alert-lbl">🔔 APY Alert</span>
+    <span class="alert-lbl">🔔 Alert</span>
+    <div class="alert-sep"></div>
     <span class="alert-lbl">Threshold</span>
     <input class="alert-input" type="number" id="alert-threshold" value="10" min="0" step="0.5" />
     <span class="alert-unit">%</span>
@@ -413,8 +618,11 @@
       <div class="alert-dot"></div>
       <span id="alert-toggle-txt">Enable Alerts</span>
     </button>
+    <button class="btn-test-alert" id="btn-test-alert" onclick="testAlert()" title="Fire a test alert to verify sound &amp; notifications work">Test</button>
     <span class="alert-status" id="alert-status"></span>
   </div>
+
+  </div><!-- /.mob-extras -->
 
 </div><!-- /#top-band -->
 
@@ -454,6 +662,9 @@
     <tbody id="tbody"></tbody>
   </table>
 
+  <!-- Card list for mobile view -->
+  <div id="card-list" class="card-list"></div>
+
 </div>
 
 <script>
@@ -468,6 +679,8 @@ let rfTimer, cdTimer;
 const RF = 10;            // refresh seconds
 const CIRC = 75.4;        // 2π × r(12)
 let cd = RF;
+let lastTickTime  = Date.now();   // for drift-compensated countdown
+let isRefreshing  = false;        // guard against concurrent refreshes
 
 const exSt = { Binance:'loading', OKX:'loading', Bybit:'loading' };
 
@@ -762,18 +975,33 @@ async function refreshPrices() {
 
 function startLoop() {
   clearInterval(rfTimer); clearInterval(cdTimer);
-  cd=RF; tickRing();
+  cd=RF; lastTickTime=Date.now(); tickRing();
 
+  // Drift-compensated countdown: compares real elapsed time
   cdTimer = setInterval(()=>{
-    cd = Math.max(0,cd-1);
-    tickRing();
-  },1000);
+    const now = Date.now();
+    const elapsed = Math.round((now - lastTickTime) / 1000);
+    if (elapsed >= 1) {
+      cd = Math.max(0, cd - elapsed);
+      lastTickTime = now;
+      tickRing();
+    }
+  }, 500); // check every 500ms for smoother catch-up
 
   rfTimer = setInterval(async()=>{
-    cd=RF;
+    cd=RF; lastTickTime=Date.now();
     tickRing();            // snap ring back to full immediately
-    await refreshPrices();
+    alertedKeys.clear();   // clear so every cycle re-checks all symbols
+    await safeRefreshPrices();
   }, RF*1000);
+}
+
+// Guard against overlapping refresh calls
+async function safeRefreshPrices() {
+  if (isRefreshing) return;
+  isRefreshing = true;
+  try { await refreshPrices(); }
+  finally { isRefreshing = false; }
 }
 
 async function manualRefresh() {
@@ -781,8 +1009,10 @@ async function manualRefresh() {
   btn.disabled=true;
   btn.classList.add('spinning');
   btn.addEventListener('animationend', ()=>btn.classList.remove('spinning'), {once:true});
-  await refreshPrices();
-  cd=RF; tickRing();
+  await safeRefreshPrices();
+  cd=RF; lastTickTime=Date.now(); tickRing();
+  // restart loop timers so next auto-refresh is a full interval away
+  startLoop();
   btn.disabled=false;
 }
 
@@ -832,57 +1062,118 @@ function renderTable() {
 
   document.getElementById('pair-count').textContent = rows.length+' pairs';
 
-  const loading = document.getElementById('st-loading');
-  const tbl     = document.getElementById('tbl');
-  const empty   = document.getElementById('st-empty');
+  const loading  = document.getElementById('st-loading');
+  const tbl      = document.getElementById('tbl');
+  const cardList = document.getElementById('card-list');
+  const empty    = document.getElementById('st-empty');
+  const isMobile = window.innerWidth <= 768;
 
   if (opps.length===0 && exSt.Binance==='loading') {
-    loading.style.display='block'; tbl.style.display='none'; empty.style.display='none'; return;
+    loading.style.display='block'; tbl.style.display='none';
+    cardList.style.display='none'; empty.style.display='none'; return;
   }
   loading.style.display='none';
-  if (!rows.length) { tbl.style.display='none'; empty.style.display='block'; return; }
-  tbl.style.display='table'; empty.style.display='none';
+  if (!rows.length) {
+    tbl.style.display='none'; cardList.style.display='none';
+    empty.style.display='block'; return;
+  }
+  empty.style.display='none';
 
   const maxAbs = Math.max(...rows.map(r=>Math.abs(r.apy||0)),1);
 
-  document.getElementById('tbody').innerHTML = rows.map((r,i)=>{
-    const ed  = new Date(r.expiryTs).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
-    const dr  = Math.round(r.days);
-    const bp  = Math.abs(r.apy||0)/maxAbs*100;
-    return `<tr>
-      <td class="rk">${i+1}</td>
-      <td><span class="ex-badge ${r.exchange.toLowerCase()}">${r.exchange}</span></td>
-      <td>
-        <a class="asset-link" href="${spotUrl(r.exchange,r.baseAsset)}" target="_blank" rel="noopener noreferrer">
-          <div class="asset">${r.baseAsset}</div>
-          <div class="asub">${r.baseAsset}/USDT ↗</div>
-        </a>
-      </td>
-      <td><div class="p-spot" style="color:${priceChangeColor(r.spotChange24h)}">${fp(r.spotPrice)}</div></td>
-      <td><div class="p-bid"  style="color:${priceChangeColor(r.futuresChange24h)}">${fp(r.futuresPrice)}</div></td>
-      <td><div class="p-last" style="color:${priceChangeColor(r.futuresChange24h)}">${fp(r.futuresLastPrice)}</div></td>
-      <td>
-        <div class="fsym"><a href="${tradeUrl(r.exchange,r.futuresSymbol)}" target="_blank" rel="noopener noreferrer">${r.futuresSymbol}</a></div>
-        <div class="ftyp">${r.label}</div>
-      </td>
-      <td>
-        <span class="exp-b ${eCls(r.days)}">${ed}</span>
-        <div class="edays">${dr}d remaining</div>
-      </td>
-      <td><span class="${r.premium>=0?'pp':'pn'}">${r.premium>=0?'+':''}${r.premium.toFixed(3)}%</span></td>
-      <td>
-        <div class="apy-n" style="color:${apyColor(r.apy)}">${fa(r.apy)}</div>
-        <div class="abar-bg"><div class="abar-fill" style="width:${bp.toFixed(1)}%;background:${apyColor(r.apy)}"></div></div>
-      </td>
-    </tr>`;
-  }).join('');
+  if (isMobile) {
+    // ── CARD VIEW ──
+    tbl.style.display='none';
+    cardList.style.display='block';
+    cardList.innerHTML = rows.map((r,i)=>{
+      const ed  = new Date(r.expiryTs).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+      const dr  = Math.round(r.days);
+      const bp  = Math.abs(r.apy||0)/maxAbs*100;
+      const ac  = apyColor(r.apy);
+      return `<div class="mob-card" style="--accent:${ac}">
+        <div class="mob-card-head">
+          <div class="mob-card-asset">
+            <span class="mob-card-rank">#${i+1}</span>
+            <a class="asset-link" href="${spotUrl(r.exchange,r.baseAsset)}" target="_blank" rel="noopener noreferrer">
+              <div class="asset">${r.baseAsset}<span style="font-size:11px;color:var(--label);margin-left:5px">/USDT ↗</span></div>
+            </a>
+          </div>
+          <span class="ex-badge ${r.exchange.toLowerCase()}">${r.exchange}</span>
+        </div>
+        <div class="mob-card-apy">
+          <div class="mob-card-apy-lbl">APY / Year</div>
+          <div class="mob-card-apy-row">
+            <div class="apy-n" style="color:${ac};font-size:26px;letter-spacing:-.5px">${fa(r.apy)}</div>
+            <div class="mob-card-apy-sub">${dr}d · ${r.premium>=0?'+':''}${r.premium.toFixed(2)}% basis</div>
+          </div>
+          <div class="abar-bg" style="margin-top:8px;height:3px"><div class="abar-fill" style="width:${bp.toFixed(1)}%;background:${ac}"></div></div>
+        </div>
+        <div class="mob-card-grid">
+          <div class="mob-cg-row">
+            <span class="mob-cg-lbl">Spot Price</span>
+            <span class="mob-cg-val p-spot" style="color:${priceChangeColor(r.spotChange24h)}">${fp(r.spotPrice)}</span>
+          </div>
+          <div class="mob-cg-row">
+            <span class="mob-cg-lbl">Best Bid (futures)</span>
+            <span class="mob-cg-val p-bid" style="color:${priceChangeColor(r.futuresChange24h)}">${fp(r.futuresPrice)}</span>
+          </div>
+          <div class="mob-cg-row">
+            <span class="mob-cg-lbl">Expiry</span>
+            <span class="mob-cg-val"><span class="exp-b ${eCls(r.days)}">${ed}</span></span>
+          </div>
+          <div class="mob-cg-row">
+            <span class="mob-cg-lbl">Contract</span>
+            <span class="mob-cg-val fsym" style="font-size:12px">${r.futuresSymbol}</span>
+          </div>
+        </div>
+        <div class="mob-card-footer">
+          <a class="mob-trade-btn primary" href="${tradeUrl(r.exchange,r.futuresSymbol)}" target="_blank" rel="noopener noreferrer">Short Futures →</a>
+          <a class="mob-trade-btn secondary" href="${spotUrl(r.exchange,r.baseAsset)}" target="_blank" rel="noopener noreferrer">Buy Spot</a>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    // ── TABLE VIEW ──
+    cardList.style.display='none';
+    tbl.style.display='table';
+    document.getElementById('tbody').innerHTML = rows.map((r,i)=>{
+      const ed  = new Date(r.expiryTs).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+      const dr  = Math.round(r.days);
+      const bp  = Math.abs(r.apy||0)/maxAbs*100;
+      return `<tr>
+        <td class="rk">${i+1}</td>
+        <td><span class="ex-badge ${r.exchange.toLowerCase()}">${r.exchange}</span></td>
+        <td>
+          <a class="asset-link" href="${spotUrl(r.exchange,r.baseAsset)}" target="_blank" rel="noopener noreferrer">
+            <div class="asset">${r.baseAsset}</div>
+            <div class="asub">${r.baseAsset}/USDT ↗</div>
+          </a>
+        </td>
+        <td><div class="p-spot" style="color:${priceChangeColor(r.spotChange24h)}">${fp(r.spotPrice)}</div></td>
+        <td><div class="p-bid"  style="color:${priceChangeColor(r.futuresChange24h)}">${fp(r.futuresPrice)}</div></td>
+        <td><div class="p-last" style="color:${priceChangeColor(r.futuresChange24h)}">${fp(r.futuresLastPrice)}</div></td>
+        <td>
+          <div class="fsym"><a href="${tradeUrl(r.exchange,r.futuresSymbol)}" target="_blank" rel="noopener noreferrer">${r.futuresSymbol}</a></div>
+          <div class="ftyp">${r.label}</div>
+        </td>
+        <td>
+          <span class="exp-b ${eCls(r.days)}">${ed}</span>
+          <div class="edays">${dr}d remaining</div>
+        </td>
+        <td><span class="${r.premium>=0?'pp':'pn'}">${r.premium>=0?'+':''}${r.premium.toFixed(3)}%</span></td>
+        <td>
+          <div class="apy-n" style="color:${apyColor(r.apy)}">${fa(r.apy)}</div>
+          <div class="abar-bg"><div class="abar-fill" style="width:${bp.toFixed(1)}%;background:${apyColor(r.apy)}"></div></div>
+        </td>
+      </tr>`;
+    }).join('');
 
-  // update sort indicators
-  document.querySelectorAll('th').forEach(t=>t.classList.remove('sa','sd'));
-  const cols=[null,'exchange','baseAsset','spotPrice','futuresPrice','futuresLastPrice',null,'days','premium','apy'];
-  const idx=cols.indexOf(sCol);
-  if(idx>=0){const t=document.querySelectorAll('th')[idx];if(t)t.classList.add(sDir==='asc'?'sa':'sd');}
-
+    // update sort indicators
+    document.querySelectorAll('#thead th').forEach(t=>t.classList.remove('sa','sd'));
+    const cols=[null,'exchange','baseAsset','spotPrice','futuresPrice','futuresLastPrice',null,'days','premium','apy'];
+    const idx=cols.indexOf(sCol);
+    if(idx>=0){const t=document.querySelectorAll('#thead th')[idx];if(t)t.classList.add(sDir==='asc'?'sa':'sd');}
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -916,22 +1207,30 @@ let alertedKeys  = new Set();
 let toastTimer   = null;
 let audioCtx     = null;
 
-function playAlertSound() {
+async function ensureAudioCtx() {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Two-tone ascending chime: 880 Hz → 1320 Hz
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+    return audioCtx.state === 'running' ? audioCtx : null;
+  } catch(_) { return null; }
+}
+
+async function playAlertSound() {
+  const ctx = await ensureAudioCtx();
+  if (!ctx) return;
+  try {
     const notes = [880, 1100, 1320];
     notes.forEach((freq, i) => {
-      const osc  = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain); gain.connect(audioCtx.destination);
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.14);
-      gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.14);
-      gain.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + i * 0.14 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.14 + 0.35);
-      osc.start(audioCtx.currentTime + i * 0.14);
-      osc.stop(audioCtx.currentTime + i * 0.14 + 0.36);
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.14);
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.14);
+      gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.14 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.14 + 0.38);
+      osc.start(ctx.currentTime + i * 0.14);
+      osc.stop(ctx.currentTime + i * 0.14 + 0.40);
     });
   } catch(_) {}
 }
@@ -942,63 +1241,78 @@ function alertThreshold() {
 
 async function toggleAlert() {
   if (!alertEnabled) {
-    // request permission first
-    if (Notification.permission === 'default') {
+    if (typeof Notification === 'undefined') {
+      setAlertStatus('Notifications not supported — in-page toasts only', '#fbbf24');
+      alertEnabled = true;
+    } else if (Notification.permission === 'default') {
       const perm = await Notification.requestPermission();
       if (perm !== 'granted') {
-        setAlertStatus('Permission denied — enable notifications in browser settings', '#f87171');
-        return;
+        setAlertStatus('Browser notifications denied — in-page toasts will still work', '#fbbf24');
       }
+      alertEnabled = true;
+    } else if (Notification.permission === 'denied') {
+      setAlertStatus('Notifications blocked — in-page toasts will still work', '#fbbf24');
+      alertEnabled = true;
+    } else {
+      alertEnabled = true;
     }
-    if (Notification.permission === 'denied') {
-      setAlertStatus('Notifications blocked — allow them in browser settings', '#f87171');
-      return;
-    }
-    alertEnabled = true;
+    // Resume AudioContext on user gesture (required by browser policy)
+    ensureAudioCtx();
     alertedKeys.clear();
   } else {
     alertEnabled = false;
+    setAlertStatus('', '');
   }
   const btn = document.getElementById('alert-toggle-btn');
   const txt = document.getElementById('alert-toggle-txt');
   btn.classList.toggle('on', alertEnabled);
   txt.textContent = alertEnabled ? 'Alerts On' : 'Enable Alerts';
-  setAlertStatus(alertEnabled ? `Will notify when APY ≥ ${alertThreshold()}%` : '', '');
+  if (alertEnabled && !document.getElementById('alert-status').textContent) {
+    setAlertStatus(`Will notify when APY ≥ ${alertThreshold()}%`, '');
+  }
 }
 
 function setAlertStatus(msg, color) {
   const el = document.getElementById('alert-status');
   el.textContent = msg;
-  el.style.color = color || '#8898b4';
+  el.style.color = color || 'var(--label)';
 }
 
-function checkAlerts() {
+async function checkAlerts() {
   if (!alertEnabled) return;
   const thr = alertThreshold();
-  const hits = opps.filter(r => r.apy !== null && isFinite(r.apy) && r.apy >= thr);
+  // Sort hits by APY descending so toast shows best opportunities first
+  const hits = opps
+    .filter(r => r.apy !== null && isFinite(r.apy) && r.apy >= thr)
+    .sort((a, b) => b.apy - a.apy);
+  if (!hits.length) return;
+
+  // Determine which symbols are newly triggering this cycle
   const newHits = hits.filter(r => {
     const key = `${r.exchange}:${r.futuresSymbol}`;
     if (alertedKeys.has(key)) return false;
     alertedKeys.add(key);
     return true;
   });
+  // Only fire sound + notification when there is at least one newly-seen hit
   if (!newHits.length) return;
 
   // Sound
-  playAlertSound();
+  await playAlertSound();
 
-  // Browser Notification (one grouped notification)
-  if (Notification.permission === 'granted') {
-    const top  = newHits[0];
-    const title = `🔔 Cash-Carry Alert — ${newHits.length} pair${newHits.length>1?'s':''} above ${alertThreshold()}%`;
-    const body  = newHits.slice(0,4).map(r =>
-      `${r.baseAsset} (${r.exchange}) ${fa(r.apy)} · ${Math.round(r.days)}d`
-    ).join('\n');
-    new Notification(title, { body });
-  }
+  // Browser Notification — show ALL current hits, not just new ones
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      const title = `Cash-Carry Alert — ${hits.length} pair${hits.length>1?'s':''} above ${thr}%`;
+      const body  = hits.slice(0, 4).map(r =>
+        `${r.baseAsset} (${r.exchange}) ${fa(r.apy)} · ${Math.round(r.days)}d`
+      ).join('\n');
+      new Notification(title, { body, tag: 'cash-carry-alert' });
+    }
+  } catch(_) {}
 
-  // In-page toast
-  showToast(newHits);
+  // In-page toast — show ALL symbols currently above threshold
+  showToast(hits);
 }
 
 function showToast(hits) {
@@ -1007,19 +1321,44 @@ function showToast(hits) {
   if (existing) existing.remove();
 
   const rows = hits.slice(0, 5).map(r =>
-    `<div class="notif-row"><strong style="color:var(--text)">${r.baseAsset}</strong> &nbsp;${r.exchange} &nbsp;<span style="color:${apyColor(r.apy)};font-weight:600">${fa(r.apy)}</span> &nbsp;<span style="color:#7a8fab">${Math.round(r.days)}d</span></div>`
+    `<div class="notif-row">
+      <span class="notif-row-asset">${r.baseAsset} <span style="font-weight:400;color:var(--sublabel);font-size:11px">${r.exchange}</span></span>
+      <span><span style="color:${apyColor(r.apy)};font-weight:600">${fa(r.apy)}</span> <span class="notif-row-meta">${Math.round(r.days)}d</span></span>
+    </div>`
   ).join('');
 
   const toast = document.createElement('div');
   toast.id = 'notif-toast';
   toast.className = 'notif-badge';
-  toast.innerHTML = `<div class="notif-title">🔔 APY Alert — ${hits.length} pair${hits.length>1?'s':''} above ${alertThreshold()}%</div>${rows}`;
+  toast.innerHTML =
+    `<div class="notif-head">
+      <div class="notif-title">🔔 ${hits.length} pair${hits.length>1?'s':''} above ${alertThreshold()}% APY</div>
+      <button class="notif-close" onclick="this.closest('.notif-badge').remove()" aria-label="Close">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="notif-body">${rows}</div>`;
   document.body.appendChild(toast);
 
   toastTimer = setTimeout(() => {
     toast.classList.add('hide');
-    setTimeout(() => toast.remove(), 260);
-  }, 6000);
+    setTimeout(() => toast.remove(), 240);
+  }, 7000);
+}
+
+// Test alert: fire a sample toast + sound regardless of real data
+async function testAlert() {
+  if (!alertEnabled) {
+    setAlertStatus('Enable alerts first, then click Test', '#fbbf24');
+    return;
+  }
+  const sample = opps.slice(0,3).map(r => ({...r}));
+  if (!sample.length) {
+    setAlertStatus('No data yet — wait for first refresh', '#fbbf24');
+    return;
+  }
+  await playAlertSound();
+  showToast(sample);
 }
 
 // re-check threshold label whenever input changes
@@ -1028,6 +1367,65 @@ document.addEventListener('DOMContentLoaded', () => {
     if (alertEnabled) setAlertStatus(`Will notify when APY ≥ ${alertThreshold()}%`, '');
     alertedKeys.clear();   // reset so new threshold triggers fresh notifications
   });
+});
+
+// ═══════════════════════════════════════════════
+// VISIBILITY CHANGE — fix timers + alerts on tab switch
+// ═══════════════════════════════════════════════
+let hiddenAt = null;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    hiddenAt = Date.now();
+    return;
+  }
+  // Tab became visible
+  const hiddenMs = hiddenAt ? (Date.now() - hiddenAt) : 0;
+  hiddenAt = null;
+
+  // Resume AudioContext (user is now interacting)
+  ensureAudioCtx();
+
+  // If hidden > 2 min, clear alertedKeys so current opportunities re-fire
+  if (hiddenMs > 120000) alertedKeys.clear();
+
+  // Refresh data, then restart loop from clean state
+  safeRefreshPrices().then(() => {
+    cd = RF; lastTickTime = Date.now(); tickRing();
+    startLoop();
+  });
+});
+
+// ═══════════════════════════════════════════════
+// MOBILE TOGGLE
+// ═══════════════════════════════════════════════
+function toggleMobExtras() {
+  const extras = document.getElementById('mob-extras');
+  const btn    = document.getElementById('mob-toggle');
+  const txt    = document.getElementById('mob-toggle-txt');
+  const isOpen = extras.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  txt.textContent = isOpen ? 'Hide Stats & Filters' : 'Show Stats & Filters';
+}
+
+// On desktop (resize), always show extras regardless of toggle state
+let _prevMobile = window.innerWidth <= 768;
+window.addEventListener('resize', () => {
+  const extras = document.getElementById('mob-extras');
+  if (!extras) return;
+  const nowMobile = window.innerWidth <= 768;
+  if (!nowMobile) {
+    extras.style.display = '';
+    extras.classList.remove('open');
+    document.getElementById('mob-toggle-txt').textContent = 'Show Stats & Filters';
+    document.getElementById('mob-toggle').classList.remove('open');
+  } else {
+    extras.style.display = '';
+  }
+  // Re-render table/cards if layout mode changed
+  if (nowMobile !== _prevMobile) {
+    _prevMobile = nowMobile;
+    if (opps.length) renderTable();
+  }
 });
 
 // ═══════════════════════════════════════════════
