@@ -98,12 +98,18 @@
                   text-anchor:middle; font-weight:400; }
 
     .btn-ref {
-      padding:5px 13px; background:transparent;
-      border:1px solid var(--border2); border-radius:5px;
-      color:var(--dim); font-size:12px; cursor:pointer; transition:all .2s; white-space:nowrap;
+      display:flex; align-items:center; justify-content:center;
+      width:34px; height:34px; padding:0;
+      background:var(--card); border:1px solid var(--border2);
+      border-radius:8px; color:var(--dim); cursor:pointer;
+      transition:all .22s; flex-shrink:0;
     }
-    .btn-ref:hover { border-color:var(--blue); color:var(--text); }
-    .btn-ref:disabled { opacity:.4; cursor:not-allowed; }
+    .btn-ref:hover { border-color:var(--blue); color:var(--blue); background:rgba(92,138,245,.08); box-shadow:0 0 10px rgba(92,138,245,.15); }
+    .btn-ref:disabled { opacity:.35; cursor:not-allowed; }
+    .btn-ref svg { display:block; transition:transform .35s ease; }
+    .btn-ref:hover svg { transform:rotate(200deg); }
+    .btn-ref.spinning svg { animation:spin-once .5s ease forwards; }
+    @keyframes spin-once { to { transform:rotate(360deg); } }
 
     /* ─── STATS BAR ─── */
     .stats-bar {
@@ -328,7 +334,13 @@
         </svg>
       </div>
 
-      <button class="btn-ref" id="btn-ref" onclick="manualRefresh()">↻ Refresh</button>
+      <button class="btn-ref" id="btn-ref" onclick="manualRefresh()" title="Refresh now">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 4v6h-6"/>
+          <path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -766,10 +778,12 @@ function startLoop() {
 
 async function manualRefresh() {
   const btn=document.getElementById('btn-ref');
-  btn.disabled=true; btn.textContent='↻ …';
+  btn.disabled=true;
+  btn.classList.add('spinning');
+  btn.addEventListener('animationend', ()=>btn.classList.remove('spinning'), {once:true});
   await refreshPrices();
   cd=RF; tickRing();
-  btn.disabled=false; btn.textContent='↻ Refresh';
+  btn.disabled=false;
 }
 
 // ═══════════════════════════════════════════════
@@ -898,8 +912,29 @@ function srt(col) {
 // ALERT SYSTEM
 // ═══════════════════════════════════════════════
 let alertEnabled = false;
-let alertedKeys  = new Set();   // track already-notified pairs this session
+let alertedKeys  = new Set();
 let toastTimer   = null;
+let audioCtx     = null;
+
+function playAlertSound() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Two-tone ascending chime: 880 Hz → 1320 Hz
+    const notes = [880, 1100, 1320];
+    notes.forEach((freq, i) => {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.14);
+      gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.14);
+      gain.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + i * 0.14 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.14 + 0.35);
+      osc.start(audioCtx.currentTime + i * 0.14);
+      osc.stop(audioCtx.currentTime + i * 0.14 + 0.36);
+    });
+  } catch(_) {}
+}
 
 function alertThreshold() {
   return parseFloat(document.getElementById('alert-threshold').value) || 0;
@@ -949,14 +984,20 @@ function checkAlerts() {
   });
   if (!newHits.length) return;
 
-  // Web Notification
-  newHits.forEach(r => {
-    const title = `Cash-Carry Alert: ${r.baseAsset} ${fa(r.apy)}`;
-    const body  = `${r.exchange} · ${r.futuresSymbol} · Basis ${r.premium.toFixed(3)}% · ${Math.round(r.days)}d to expiry`;
-    new Notification(title, { body, icon: '' });
-  });
+  // Sound
+  playAlertSound();
 
-  // In-page toast (shows top result)
+  // Browser Notification (one grouped notification)
+  if (Notification.permission === 'granted') {
+    const top  = newHits[0];
+    const title = `🔔 Cash-Carry Alert — ${newHits.length} pair${newHits.length>1?'s':''} above ${alertThreshold()}%`;
+    const body  = newHits.slice(0,4).map(r =>
+      `${r.baseAsset} (${r.exchange}) ${fa(r.apy)} · ${Math.round(r.days)}d`
+    ).join('\n');
+    new Notification(title, { body });
+  }
+
+  // In-page toast
   showToast(newHits);
 }
 
